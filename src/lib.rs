@@ -7,7 +7,7 @@ mod tests {
     }
 }
 
-mod secure_request {
+pub mod secure_request {
     use openssl::ssl::{SslConnector, SslMethod};
     use std::io::prelude::*;
     use std::net::TcpStream;
