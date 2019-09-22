@@ -23,11 +23,16 @@ pub fn make_secure_request(url: &str, params: HashMap<&str, &str>) -> String {
         body.len(),
         body
     );
-    println!("{}", message);
     stream.write_all(message.as_bytes()).unwrap();
     let mut res = vec![];
     stream.read_to_end(&mut res).unwrap();
-    String::from_utf8(res).unwrap()
+    let response = String::from_utf8(res).unwrap();
+    response
+        .split("\r\n\r\n")
+        .into_iter()
+        .nth(1)
+        .unwrap()
+        .to_string()
 }
 
 #[cfg(test)]
@@ -37,7 +42,10 @@ mod tests {
     fn it_works() {
         let mut hash = HashMap::new();
         hash.insert("response_type", "code");
-        hash.insert("client_id", "596290354919-vbv0declhlln245v40dd2d3qoru2q584.apps.googleusercontent.com");
+        hash.insert(
+            "client_id",
+            "596290354919-vbv0declhlln245v40dd2d3qoru2q584.apps.googleusercontent.com",
+        );
         hash.insert("redirect_uri", "https://www.olmmcc.tk/admin/email/");
         hash.insert("scope", "https://mail.google.com/");
         hash.insert("access_type", "offline");
