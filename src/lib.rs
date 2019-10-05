@@ -19,7 +19,7 @@ pub fn make_secure_request(url: &str, params: HashMap<&str, &str>, auth: Option<
         body = body[0..body.len() - 1].to_string();
     }
     let auth_header = if let Some(a) = auth {
-        format!("Authorization: Bearer {}", a)
+        format!("Authorization: Bearer {}\r\n", a)
     } else {
         "".to_string()
     };
