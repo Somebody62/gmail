@@ -1,5 +1,7 @@
 use openssl::ssl::{SslConnector, SslMethod};
+use serde_json::{Value, json};
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::prelude::*;
 use std::net::TcpStream;
 
@@ -12,11 +14,8 @@ fn send(host: &str, message: &str) -> String {
     ssl_stream.read_to_end(&mut res).unwrap();
     String::from_utf8(res).unwrap()
 }
-pub fn make_secure_request(url: &str, params: HashMap<&str, &str>) -> String {
-    let partial_url = url.split("https://").into_iter().nth(1).unwrap();
-    let mut iter = partial_url.splitn(2, '/').into_iter();
-    let host = iter.next().unwrap();
-    let location = format!("/{}", iter.next().unwrap_or(""));
+
+fn make_form_request(host: &str, location: &str, params: HashMap<&str, &str>) -> String {
     let mut body = String::new();
     for (name, value) in params {
         body += &format!("{}={}&", name, value);
@@ -39,7 +38,12 @@ pub fn make_secure_request(url: &str, params: HashMap<&str, &str>) -> String {
         .unwrap()
         .to_string()
 }
-pub fn send_email(body: &str, auth: &str) -> String {
+
+pub fn send_email(email: &str, auth: &str) -> String {
+    let raw = base64::encode(&email.as_bytes());
+    let body = json!({
+        "raw": raw
+    }).to_string();
     let message = format!("POST /gmail/v1/users/me/messages/send HTTP/1.1\r\nHost: www.googleapis.com\r\nAccept: application/json\r\nConnection: close\r\nAuthorization: Bearer {}\r\nContent-length: {}\r\nContent-type: application/json\r\n\r\n{}", auth, body.len(), body);
     let response = send("www.googleapis.com", &message);
     response
@@ -48,6 +52,34 @@ pub fn send_email(body: &str, auth: &str) -> String {
         .nth(1)
         .unwrap()
         .to_string()
+}
+
+pub fn get_refresh_token(code: &str) -> String {
+    let file = File::open("/home/justus/client_secret.json").unwrap();
+    let json: Value = serde_json::from_reader(file).unwrap();
+    let mut hash = HashMap::new();
+    hash.insert("code", code);
+    hash.insert("access_type", "offline");
+    hash.insert("client_id", json["client_id"].as_str().unwrap());
+    hash.insert("client_secret", json["client_secret"].as_str().unwrap());
+    hash.insert("redirect_uri", "https://www.olmmcc.tk/admin/email/");
+    hash.insert("grant_type", "authorization_code");
+    let request = make_form_request("www.googleapis.com", "/oauth2/v4/token", hash);
+    let request_json: Value = serde_json::from_str(&request).unwrap();
+    request_json["refresh_token"].as_str().unwrap().to_string()
+}
+
+pub fn get_access_token(refresh_token: &str) -> String {
+    let file = File::open("/home/justus/client_secret.json").unwrap();
+    let json: Value = serde_json::from_reader(file).unwrap();
+    let mut hash = HashMap::new();
+    hash.insert("grant_type", "refresh_token");
+    hash.insert("client_id", json["client_id"].as_str().unwrap());
+    hash.insert("client_secret", json["client_secret"].as_str().unwrap());
+    hash.insert("refresh_token", &refresh_token);
+    let request = make_form_request("www.googleapis.com", "/oauth2/v4/token", hash);
+    let request_json: Value = serde_json::from_str(&request).unwrap();
+    request_json["access_token"].as_str().unwrap().to_string()
 }
 
 #[cfg(test)]
@@ -59,7 +91,7 @@ mod tests {
         hash.insert("access_token", "ya29.ImCRB_FFKKObj_Y4TsKVKNT-ASHka-ZNeRWilEP6PPpHXAcebeD2grYfZV_MlvD-nCh59Jh03WIjAv9cVt6oc6Wix8pCIVuVXYuFAn33VYm0op-SrSR9lmueS6Gst-nO3UE");
         println!(
             "{}",
-            make_secure_request("https://www.googleapis.com/gmail/v1/users/me/profile", hash)
+            make_form_request("www.googleapis.com", "/gmail/v1/users/me/profile", hash)
         )
     }
 }
