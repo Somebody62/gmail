@@ -40,7 +40,7 @@ pub fn make_secure_request(url: &str, params: HashMap<&str, &str>) -> String {
         .to_string()
 }
 pub fn send_email(body: &str, auth: &str) -> String {
-    let message = format!("POST /upload/gmail/v1/users/me/messages/send?uploadType=media HTTP/1.1\r\nHost: www.googleapis.com\r\nAccept: application/json\r\nConnection: close\r\nAuthorization: Bearer {}\r\nContent-length: {}\r\nContent-type: application/json\r\n\r\n{}", auth, body.len(), body);
+    let message = format!("POST /gmail/v1/users/me/messages/send HTTP/1.1\r\nHost: www.googleapis.com\r\nAccept: application/json\r\nConnection: close\r\nAuthorization: Bearer {}\r\nContent-length: {}\r\nContent-type: application/json\r\n\r\n{}", auth, body.len(), body);
     let response = send("www.googleapis.com", &message);
     response
         .split("\r\n\r\n")
