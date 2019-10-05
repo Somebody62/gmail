@@ -1,5 +1,5 @@
 [package]
-name = "http"
+name = "gmail"
 version = "0.1.1"
 authors = ["Justus Croskery <justus@olmmcc.tk>"]
 edition = "2018"
