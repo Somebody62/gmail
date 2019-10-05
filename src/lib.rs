@@ -1,5 +1,8 @@
 use openssl::ssl::{SslConnector, SslMethod};
 use serde_json::{Value, json};
+use email_format::Email;
+use chrono::prelude::*;
+
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
@@ -39,7 +42,11 @@ fn make_form_request(host: &str, location: &str, params: HashMap<&str, &str>) ->
         .to_string()
 }
 
-pub fn send_email(email: &str, auth: &str) -> String {
+pub fn send_email(name: &str, addr: &str, subject: &str, body: &str, auth: &str) -> String {
+    let mut email = Email::new("justus@olmmcc.tk", Utc::now().to_rfc2822().as_str()).unwrap();
+    email.set_to(format!("{} <{}>", name, addr).as_str()).unwrap();
+    email.set_subject(subject).unwrap();
+    email.set_body(body).unwrap();
     let raw = base64::encode(&email.as_bytes());
     let body = json!({
         "raw": raw
