@@ -40,7 +40,7 @@ pub fn make_secure_request(url: &str, params: HashMap<&str, &str>) -> String {
         .to_string()
 }
 pub fn create_draft(body: &str, auth: &str) -> String {
-    let message = format!("POST /upload/gmail/v1/users/me/drafts?uploadType=media HTTP/1.1\r\nHost: www.googleapis.com\r\nConnection: close\r\nAuthorization: Bearer {}\r\nContent-length: {}\r\nContent-type: message/rfc822\r\n\r\n{}", auth, body.len(), body);
+    let message = format!("POST /gmail/v1/users/me/drafts HTTP/1.1\r\nHost: www.googleapis.com\r\nConnection: close\r\nAuthorization: Bearer {}\r\nContent-length: {}\r\nContent-type: message/rfc822\r\n\r\n{}", auth, body.len(), body);
     let response = send("www.googleapis.com", &message);
     response
         .split("\r\n\r\n")
