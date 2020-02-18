@@ -49,7 +49,7 @@ pub fn send_email(names: Vec<String>, addresses: Vec<String>, subject: &str, bod
         to_string += &format!("{} <{}>,", names[i], addresses[i]);
     }
     println!("{}", to_string);
-    email.set_to(&to_string[0..to_string.len() - 2]).unwrap();
+    email.set_to(&to_string[0..to_string.len() - 1]).unwrap();
     email.set_subject(subject).unwrap();
     email.set_body(body).unwrap();
     let raw = base64::encode(&email.as_bytes());
