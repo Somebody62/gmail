@@ -42,7 +42,7 @@ fn make_form_request(host: &str, location: &str, params: HashMap<&str, &str>) ->
         .to_string()
 }
 
-pub fn send_email(names: Vec<&str>, addresses: Vec<&str>, subject: &str, body: &str, auth: &str) -> String {
+pub fn send_email(names: Vec<String>, addresses: Vec<String>, subject: &str, body: &str, auth: &str) -> String {
     let mut email = Email::new("justus@olmmcc.tk", Utc::now().to_rfc2822().as_str()).unwrap();
     let mut to_string = String::new();
     for i in 0..names.len() {
