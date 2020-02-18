@@ -46,7 +46,7 @@ pub fn send_email(names: Vec<String>, addresses: Vec<String>, subject: &str, bod
     let mut email = Email::new("justus@olmmcc.tk", Utc::now().to_rfc2822().as_str()).unwrap();
     let mut to_string = String::new();
     for i in 0..names.len() {
-        to_string += &format!("{} <{}>;", names[i], addresses[i]);
+        to_string += &format!("{} <{}>,", names[i], addresses[i]);
     }
     email.set_to(&to_string[0..to_string.len() - 2]).unwrap();
     email.set_subject(subject).unwrap();
