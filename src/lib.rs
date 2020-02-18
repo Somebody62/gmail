@@ -48,8 +48,12 @@ pub fn send_email(names: Vec<String>, addresses: Vec<String>, subject: &str, bod
     for i in 0..names.len() {
         to_string += &format!("{} <{}>,", names[i], addresses[i]);
     }
-    println!("{}", to_string);
-    email.set_to(&to_string[0..to_string.len() - 1]).unwrap();
+    if names.len() > 1 {
+        email.set_bcc(&to_string[0..to_string.len() - 1]).unwrap();
+        email.set_to("<justus@olmmcc.tk>").unwrap();
+    } else {
+        email.set_to(&to_string[0..to_string.len() - 1]).unwrap();
+    }
     email.set_subject(subject).unwrap();
     email.set_body(body).unwrap();
     let raw = base64::encode(&email.as_bytes());
