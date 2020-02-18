@@ -50,7 +50,7 @@ pub fn send_email(names: Vec<String>, addresses: Vec<String>, subject: &str, bod
     }
     if names.len() > 1 {
         //email.set_bcc(&to_string[0..to_string.len() - 1]).unwrap();
-        email.set_cc("<justus@olmmcc.tk>").unwrap();
+        email.set_cc("<justus@olmmcc.tk>, <justus.croskery@gmail.com>").unwrap();
     } else {
         email.set_to(&to_string[0..to_string.len() - 1]).unwrap();
     }
