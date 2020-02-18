@@ -42,9 +42,13 @@ fn make_form_request(host: &str, location: &str, params: HashMap<&str, &str>) ->
         .to_string()
 }
 
-pub fn send_email(name: &str, addr: &str, subject: &str, body: &str, auth: &str) -> String {
+pub fn send_email(names: Vec<&str>, addresses: Vec<&str>, subject: &str, body: &str, auth: &str) -> String {
     let mut email = Email::new("justus@olmmcc.tk", Utc::now().to_rfc2822().as_str()).unwrap();
-    email.set_to(format!("{} <{}>", name, addr).as_str()).unwrap();
+    let mut to_string = String::new();
+    for i in 0..names.len() {
+        to_string += &format!("{} <{}>;", names[i], addresses[i]);
+    }
+    email.set_to(&to_string[0..to_string.len() - 2]).unwrap();
     email.set_subject(subject).unwrap();
     email.set_body(body).unwrap();
     let raw = base64::encode(&email.as_bytes());
