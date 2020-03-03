@@ -91,7 +91,6 @@ pub async fn get_access_token(refresh_token: &str) -> String {
     hash.insert("client_secret", json["client_secret"].as_str().unwrap());
     hash.insert("refresh_token", &refresh_token);
     let request = make_form_req(hash).await;
-    println!("{:?}", request);
     let request_json: Value = serde_json::from_str(&request).unwrap();
     request_json["access_token"].as_str().unwrap().to_string()
 }
