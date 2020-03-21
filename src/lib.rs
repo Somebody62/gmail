@@ -1,8 +1,8 @@
 use chrono::prelude::*;
 use email_format::Email;
 use hyper::{Body, Client, Method, Request};
-use hyper_tls::HttpsConnector;
 use serde_json::{json, Value};
+use hyper_alpn::AlpnConnector;
 
 use std::collections::HashMap;
 use std::fs::File;
@@ -36,8 +36,7 @@ async fn make_form_req(hash: HashMap<&str, &str>) -> String {
 }
 
 async fn make_post_req(req: Request<Body>) -> String {
-    let https = HttpsConnector::new();
-    let client = Client::builder().build::<_, hyper::Body>(https);
+    let client = &Client::builder().http2_only(true).build(AlpnConnector::new());
     let resp = client.request(req).await.unwrap();
     String::from_utf8(
         hyper::body::to_bytes(resp.into_body())
