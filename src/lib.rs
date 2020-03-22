@@ -102,7 +102,7 @@ mod tests {
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             tokio::spawn(async {
-                let body = get_access_token("1//0fYFaGPcBgb0kCgYIARAAGA8SNgF-L9Ir4odqYEhdka6orNrc-CTLcgW9ncMmlXrTUc3MahdgPTepwPi_c4NH9AnyTfei0frZOw").await;
+                let body = get_access_token(include_str!("../token.txt")).await;
                 println!("{:?}", send_email(vec!["justus.croskery@gmail.com".to_string()], "hi", "hi", &body).await);
             });
             loop {
