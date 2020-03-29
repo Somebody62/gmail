@@ -56,8 +56,10 @@ pub async fn send_email(addresses: Vec<String>, subject: &str, body: &str, auth:
     if addresses.len() > 1 {
         email.set_bcc(&to_string[0..to_string.len() - 1]).unwrap();
         email.set_to("justus@olmmcc.tk").unwrap();
-    } else {
+    } else if addresses.len() == 1 {
         email.set_to(&to_string[0..to_string.len() - 1]).unwrap();
+    } else {
+        return "Error! No to email address specified";
     }
     email.set_subject(subject).unwrap();
     email.set_body(body).unwrap();
