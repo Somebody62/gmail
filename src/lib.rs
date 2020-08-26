@@ -1,8 +1,8 @@
 use chrono::prelude::*;
 use email_format::Email;
 use hyper::{Body, Client, Method, Request};
-use serde_json::{json, Value};
 use hyper_alpn::AlpnConnector;
+use serde_json::{json, Value};
 
 use std::collections::HashMap;
 use std::fs::File;
@@ -36,7 +36,9 @@ async fn make_form_req(hash: HashMap<&str, &str>) -> String {
 }
 
 async fn make_post_req(req: Request<Body>) -> String {
-    let client = &Client::builder().http2_only(true).build(AlpnConnector::new());
+    let client = &Client::builder()
+        .http2_only(true)
+        .build(AlpnConnector::new());
     let resp = client.request(req).await.unwrap();
     String::from_utf8(
         hyper::body::to_bytes(resp.into_body())
@@ -83,7 +85,7 @@ pub async fn get_refresh_token(code: &str) -> String {
     request_json["refresh_token"].as_str().unwrap().to_string()
 }
 
-pub async fn get_access_token(refresh_token: &str) -> String {
+pub async fn get_access_token(refresh_token: &str) -> Option<String> {
     let file = File::open("/home/justus/client_secret.json").unwrap();
     let json: Value = serde_json::from_reader(file).unwrap();
     let mut hash = HashMap::new();
@@ -94,7 +96,11 @@ pub async fn get_access_token(refresh_token: &str) -> String {
     let request = make_form_req(hash).await;
     let request_json: Value = serde_json::from_str(&request).unwrap();
     println!("{}", request_json);
-    request_json["access_token"].as_str().unwrap().to_string()
+    if let Some(token) = request_json["access_token"].as_str() {
+        Some(token.to_string())
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -105,12 +111,21 @@ mod tests {
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
             tokio::spawn(async {
-                let body = get_access_token(include_str!("../token.txt")).await;
-                println!("{:?}", send_email(vec!["justus.croskery@gmail.com".to_string()], "hi", "hi", &body).await);
+                let body = get_access_token(include_str!("../token.txt"))
+                    .await
+                    .unwrap();
+                println!(
+                    "{:?}",
+                    send_email(
+                        vec!["justus.croskery@gmail.com".to_string()],
+                        "hi",
+                        "hi",
+                        &body
+                    )
+                    .await
+                );
             });
-            loop {
-
-            }
+            loop {}
         });
     }
 }
